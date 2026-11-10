@@ -14,9 +14,19 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <random>
+#include <chrono>
 
 using namespace std;
 
+int GetRandomNumber(int max)
+{
+	static unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	static minstd_rand0 generator(seed);
+	std::uniform_int_distribution<int> distribution(0, max);
+	return distribution(generator);
+
+}
 
 class Giver
 {
@@ -28,13 +38,16 @@ class Giver
 public:
 	Giver(string name, set<string> excludeList) :
 	m_name(name), m_excludeList(excludeList), m_recipient("")
-	{}
+	{
+		m_excludeList.insert(m_name);
+	}
 
 
 	string AssignRecipient(set<string> unassignedRecipients)
 	{
 		vector<string> availableRecipients(AvailableRecipients(unassignedRecipients));
-		int randomIndex = rand() % availableRecipients.size();
+
+		int randomIndex = GetRandomNumber(availableRecipients.size()-1);
 		m_recipient = availableRecipients[randomIndex];
 
 		return m_recipient;
@@ -83,8 +96,6 @@ int main() {
 	bool allAssigned = false;
 	while(!allAssigned)
 	{
-		std::srand(std::time(0));
-
 		bool failedAssignment = false;
 		// assign next
 		set<string> remainingRecipients = recipients;
