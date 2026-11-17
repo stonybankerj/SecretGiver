@@ -29,18 +29,23 @@ int GetRandomNumber(const int max)
 
 }
 
+set<string> extendSet(set<string> original, const string& extension)
+{
+	original.insert(extension);
+	return original;
+}
+
 class Giver
 {
 
 	const string m_name;
-	set<string> m_excludeList;
+	const set<string> m_excludeList;
 	string m_recipient;
 
 public:
 	Giver(string  name, const set<string>& excludeList) :
-	m_name(std::move(name)), m_excludeList(excludeList), m_recipient("")
+	m_name(std::move(name)), m_excludeList(extendSet(excludeList, m_name)), m_recipient("")
 	{
-		m_excludeList.insert(m_name);
 	}
 
 
