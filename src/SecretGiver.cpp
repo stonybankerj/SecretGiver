@@ -11,6 +11,7 @@
 #include <iterator>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -19,7 +20,7 @@
 
 using namespace std;
 
-int GetRandomNumber(int max)
+int GetRandomNumber(const int max)
 {
 	static unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	static minstd_rand0 generator(seed);
@@ -31,39 +32,39 @@ int GetRandomNumber(int max)
 class Giver
 {
 
-	string m_name;
+	const string m_name;
 	set<string> m_excludeList;
 	string m_recipient;
 
 public:
-	Giver(string name, set<string> excludeList) :
-	m_name(name), m_excludeList(excludeList), m_recipient("")
+	Giver(string  name, const set<string>& excludeList) :
+	m_name(std::move(name)), m_excludeList(excludeList), m_recipient("")
 	{
 		m_excludeList.insert(m_name);
 	}
 
 
-	string AssignRecipient(set<string> unassignedRecipients)
+	string AssignRecipient(const set<string>& unassignedRecipients)
 	{
-		vector<string> availableRecipients(AvailableRecipients(unassignedRecipients));
+		const vector<string> availableRecipients(AvailableRecipients(unassignedRecipients));
 
-		int randomIndex = GetRandomNumber(availableRecipients.size()-1);
+		const int randomIndex = GetRandomNumber(availableRecipients.size()-1);
 		m_recipient = availableRecipients[randomIndex];
 
 		return m_recipient;
 	}
 
-	bool CanAssignRecipient(set<string> unassignedRecipients)
+	bool CanAssignRecipient(const set<string>& unassignedRecipients) const
 	{
 		return! AvailableRecipients(unassignedRecipients).empty();
 	}
 
-	string Filename()
+	string Filename() const
 	{
 		return m_name;
 	}
 
-	string Recipient()
+	string Recipient() const
 	{
 		return m_recipient;
 	}
@@ -71,7 +72,7 @@ public:
 
 
 	private:
-		vector<string> AvailableRecipients(set<string> unassignedRecipients)
+		vector<string> AvailableRecipients(const set<string>& unassignedRecipients) const
 		{
 			vector<string> difference_set(unassignedRecipients.size());
 			std::vector<string>::iterator it = set_difference(unassignedRecipients.begin(), unassignedRecipients.end(),
@@ -123,7 +124,7 @@ int main() {
 	// now create a bunch of files, name is giver, contents is recipient
 	for(int index = 0; index < givers.size(); index++)
 	{
-		auto nextGiver = givers[index];
+		const auto& nextGiver = givers[index];
 		auto fileName = nextGiver.Filename();
 		std::ofstream out(fileName);
     	out << nextGiver.Recipient();
