@@ -73,7 +73,7 @@ public:
 	private:
 		vector<string> AvailableRecipients(set<string> unassignedRecipients)
 		{
-			vector<string> difference_set;
+			vector<string> difference_set(unassignedRecipients.size());
 			std::vector<string>::iterator it = set_difference(unassignedRecipients.begin(), unassignedRecipients.end(),
 							m_excludeList.begin(), 	m_excludeList.end(), difference_set.begin());
 			difference_set.resize(it - difference_set.begin());
@@ -111,6 +111,7 @@ int main() {
 			if(!nextGiver.CanAssignRecipient(remainingRecipients))
 			{
 				failedAssignment = true;
+				std::cout << "Failed to find recipient for" << nextGiver.Filename();
 				break;
 			}
 			auto assignedRecipient = nextGiver.AssignRecipient(remainingRecipients);
