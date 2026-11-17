@@ -1,0 +1,26 @@
+{
+  "givers": [
+    { "name": "John",    "excludes": [ "Rosemary" ] },
+    { "name": "Rosemary","excludes": [ "John" ] },
+    { "name": "Cuthbert","excludes": [] },
+    { "name": "Philip",  "excludes": [] },
+    { "name": "Hannah", "excludes":  ["Chanell", "Quinten"]},
+    { "name": "Chanell", "excludes":  ["Hannah", "Quinten"]},
+    { "name": "Quinten", "excludes":  ["Chanell", "Hannah"]},
+    { "name": "Victoria", "excludes":  ["Marc", "Boss"]},
+    { "name": "Marc", "excludes":  ["Victoria", "Boss"]},
+    { "name": "Boss", "excludes":  ["Victoria", "Marc"]}
+  ],
+  "recipients": [
+    "John",
+    "Rosemary",
+    "Cuthbert",
+    "Philip",
+    "Hannah",
+    "Victoria",
+    "Marc",
+    "Boss",
+    "Chanell",
+    "Quinten"
+  ]
+}

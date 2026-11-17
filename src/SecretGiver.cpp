@@ -3,7 +3,7 @@
 // Author      : John Klippenstein
 // Version     :
 // Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
+// Description : Uses schema2cpp to load givers and receivers from JSON
 //============================================================================
 
 #include <iostream>
@@ -17,6 +17,8 @@
 #include <iostream>
 #include <random>
 #include <chrono>
+
+#include "InputConfig.hpp"
 
 using namespace std;
 
@@ -91,18 +93,17 @@ public:
 
 
 int main() {
-	// build list of givers with excludedRecipients
+	// Load givers and receivers from the embedded schema2cpp-generated data
+	const InputConfig& config = defaultInputConfig();
 
+	vector<Giver> givers;
+	for (const auto& g : config.givers)
+	{
+		set excludes(g.excludes.begin(), g.excludes.end());
+		givers.emplace_back(g.name, excludes);
+	}
 
-	vector<Giver> givers = {
-			Giver ("John", set<string>{"Rosemary"}),
-			Giver ("Rosemary", set<string>{"John"}),
-			Giver("Cuthbert",{}),
-			Giver("Philip", {})
-	};
-
-	/// and many more
-	set<string> recipients {"John", "Rosemary", "Cuthbert", "Philip"};
+	set<string> recipients {config.recipients.begin(), config.recipients.end()};
 
 	bool allAssigned = false;
 	while(!allAssigned)
