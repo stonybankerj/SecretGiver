@@ -105,10 +105,8 @@ int main() {
 		bool failedAssignment = false;
 		// assign next
 		set<string> remainingRecipients = recipients;
-		//for_each()
-		for(int index = 0; index < givers.size(); index++)
+		for(auto& nextGiver : givers)
 		{
-			auto nextGiver = givers[index];
 			if(!nextGiver.CanAssignRecipient(remainingRecipients))
 			{
 				failedAssignment = true;
@@ -122,9 +120,8 @@ int main() {
 	}
 
 	// now create a bunch of files, name is giver, contents is recipient
-	for(int index = 0; index < givers.size(); index++)
+	for(const auto & nextGiver : givers)
 	{
-		const auto& nextGiver = givers[index];
 		auto fileName = nextGiver.Filename();
 		std::ofstream out(fileName);
     	out << nextGiver.Recipient();
