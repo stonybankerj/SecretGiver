@@ -110,7 +110,7 @@ int main() {
 			auto nextGiver = givers[index];
 			if(!nextGiver.CanAssignRecipient(remainingRecipients))
 			{
-				failedAssignment = false;
+				failedAssignment = true;
 				break;
 			}
 			auto assignedRecipient = nextGiver.AssignRecipient(remainingRecipients);
