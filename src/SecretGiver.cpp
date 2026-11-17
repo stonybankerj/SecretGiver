@@ -66,6 +66,14 @@ public:
 		return! AvailableRecipients(unassignedRecipients).empty();
 	}
 
+	void Write() const
+	{
+		ofstream output(m_name);
+		output << m_recipient;
+		output.close();
+
+	}
+
 	string Filename() const
 	{
 		return m_name;
@@ -128,10 +136,7 @@ int main() {
 	// now create a bunch of files, name is giver, contents is recipient
 	for(const auto & nextGiver : givers)
 	{
-		auto fileName = nextGiver.Filename();
-		std::ofstream out(fileName);
-    	out << nextGiver.Recipient();
-    	out.close();
+		nextGiver.Write();
 	}
 
 	return 0;
