@@ -86,12 +86,17 @@ public:
 
 int main() {
 	// build list of givers with excludedRecipients
-	Giver John("John", set<string>{"Rosemary"});
-	Giver Rosemary("Rosemary", set<string>{"John"});
+
+
+	vector<Giver> givers = {
+			Giver ("John", set<string>{"Rosemary"}),
+			Giver ("Rosemary", set<string>{"John"}),
+			Giver("Cuthbert",{}),
+			Giver("Philip", {})
+	};
 
 	/// and many more
-	vector<Giver> givers {John, Rosemary};
-	set<string> recipients {"John", "Rosemary"};
+	set<string> recipients {"John", "Rosemary", "Cuthbert", "Philip"};
 
 	bool allAssigned = false;
 	while(!allAssigned)
