@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 #include <fstream>
-#include <iostream>
 #include <random>
 #include <chrono>
 
@@ -22,11 +21,11 @@
 
 using namespace std;
 
-int GetRandomNumber(const int max)
+size_t GetRandomNumber(const size_t max)
 {
 	static unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	static minstd_rand0 generator(seed);
-	std::uniform_int_distribution<int> distribution(0, max);
+	std::uniform_int_distribution<size_t> distribution(0, max);
 	return distribution(generator);
 
 }
@@ -46,24 +45,24 @@ class Giver
 
 public:
 	Giver(string  name, const set<string>& excludeList) :
-	m_name(std::move(name)), m_excludeList(extendSet(excludeList, m_name)), m_recipient("")
+	m_name(std::move(name)), m_excludeList(extendSet(excludeList, m_name))
 	{
 	}
 
 
-	string AssignRecipient(const set<string>& unassignedRecipients)
+	optional<string> AssignRecipient(const set<string>& unassignedRecipients)
 	{
-		const vector<string> availableRecipients(AvailableRecipients(unassignedRecipients));
+		const vector availableRecipients(AvailableRecipients(unassignedRecipients));
+		if(availableRecipients.empty())
+		{
+			std::cout << "Failed to find recipient for" << m_name;
+			return nullopt;
+		}
 
-		const int randomIndex = GetRandomNumber(availableRecipients.size()-1);
+		const auto randomIndex = GetRandomNumber(availableRecipients.size()-1);
 		m_recipient = availableRecipients[randomIndex];
 
 		return m_recipient;
-	}
-
-	bool CanAssignRecipient(const set<string>& unassignedRecipients) const
-	{
-		return! AvailableRecipients(unassignedRecipients).empty();
 	}
 
 	void Write() const
@@ -74,28 +73,15 @@ public:
 
 	}
 
-	string Filename() const
-	{
-		return m_name;
-	}
-
-	string Recipient() const
-	{
-		return m_recipient;
-	}
-
-
-
 	private:
-		vector<string> AvailableRecipients(const set<string>& unassignedRecipients) const
+		[[nodiscard]] vector<string> AvailableRecipients(const set<string>& unassignedRecipients) const
 		{
 			vector<string> difference_set(unassignedRecipients.size());
-			std::vector<string>::iterator it = set_difference(unassignedRecipients.begin(), unassignedRecipients.end(),
+			const auto it = set_difference(unassignedRecipients.begin(), unassignedRecipients.end(),
 							m_excludeList.begin(), 	m_excludeList.end(), difference_set.begin());
 			difference_set.resize(it - difference_set.begin());
 			return difference_set;
 		}
-
 
 };
 
@@ -111,7 +97,7 @@ int main() {
 		givers.emplace_back(g.name, excludes);
 	}
 
-	set<string> recipients {config.recipients.begin(), config.recipients.end()};
+	const set<string> recipients {config.recipients.begin(), config.recipients.end()};
 
 	bool allAssigned = false;
 	while(!allAssigned)
@@ -121,14 +107,15 @@ int main() {
 		set<string> remainingRecipients = recipients;
 		for(auto& nextGiver : givers)
 		{
-			if(!nextGiver.CanAssignRecipient(remainingRecipients))
+			if(auto assignedRecipient = nextGiver.AssignRecipient(remainingRecipients))
+			{
+				remainingRecipients.erase(*assignedRecipient);
+			}
+			else
 			{
 				failedAssignment = true;
-				std::cout << "Failed to find recipient for" << nextGiver.Filename();
 				break;
 			}
-			auto assignedRecipient = nextGiver.AssignRecipient(remainingRecipients);
-			remainingRecipients.erase(assignedRecipient);
 		}
 		allAssigned = !failedAssignment;
 	}
