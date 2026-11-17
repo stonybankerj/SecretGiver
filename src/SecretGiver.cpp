@@ -85,6 +85,22 @@ public:
 
 };
 
+bool AssignRecipients(vector<Giver>& givers, const set<string>& recipients)
+{
+	set<string> remainingRecipients = recipients;
+	for(auto& nextGiver : givers)
+	{
+		if(auto assignedRecipient = nextGiver.AssignRecipient(remainingRecipients))
+		{
+			remainingRecipients.erase(*assignedRecipient);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	return true;
+}
 
 int main() {
 	// Load givers and receivers from the embedded schema2cpp-generated data
@@ -102,22 +118,7 @@ int main() {
 	bool allAssigned = false;
 	while(!allAssigned)
 	{
-		bool failedAssignment = false;
-		// assign next
-		set<string> remainingRecipients = recipients;
-		for(auto& nextGiver : givers)
-		{
-			if(auto assignedRecipient = nextGiver.AssignRecipient(remainingRecipients))
-			{
-				remainingRecipients.erase(*assignedRecipient);
-			}
-			else
-			{
-				failedAssignment = true;
-				break;
-			}
-		}
-		allAssigned = !failedAssignment;
+		allAssigned = AssignRecipients(givers, recipients);
 	}
 
 	// now create a bunch of files, name is giver, contents is recipient
