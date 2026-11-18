@@ -108,4 +108,4 @@ local.properties
 ### Meson ###
 # subproject directories
 /subprojects/*
-!/subprojects/*.wrap
+!/subprojects/schema2cpp.wrap
