@@ -102,10 +102,8 @@ bool AssignRecipients(vector<Giver>& givers, const set<string>& recipients)
 	return true;
 }
 
-int main() {
-	// Load givers and receivers from the embedded schema2cpp-generated data
-	const InputConfig& config = defaultInputConfig();
-
+pair<vector<Giver>, const set<string>> parseConfig(const InputConfig& config)
+{
 	vector<Giver> givers;
 	for (const auto& g : config.givers)
 	{
@@ -114,6 +112,13 @@ int main() {
 	}
 
 	const set<string> recipients {config.recipients.begin(), config.recipients.end()};
+	return {givers, recipients};
+}
+
+int main() {
+	// Load givers and receivers from the embedded schema2cpp-generated data
+	const InputConfig& config = defaultInputConfig();
+	auto [givers, recipients] = parseConfig(config);
 
 	bool allAssigned = false;
 	while(!allAssigned)
