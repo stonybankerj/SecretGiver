@@ -115,16 +115,20 @@ pair<vector<Giver>, const set<string>> parseConfig(const InputConfig& config)
 	return {givers, recipients};
 }
 
-int main() {
-	// Load givers and receivers from the embedded schema2cpp-generated data
-	const InputConfig& config = defaultInputConfig();
-	auto [givers, recipients] = parseConfig(config);
-
+void assignAllRecipients(vector<Giver>& givers, const set<string>& recipients) {
 	bool allAssigned = false;
 	while(!allAssigned)
 	{
 		allAssigned = AssignRecipients(givers, recipients);
 	}
+}
+
+int main() {
+	// Load givers and receivers from the embedded schema2cpp-generated data
+	const InputConfig& config = defaultInputConfig();
+	auto [givers, recipients] = parseConfig(config);
+
+	assignAllRecipients(givers, recipients);
 
 	// now create a bunch of files, name is giver, contents is recipient
 	for(const auto & nextGiver : givers)
