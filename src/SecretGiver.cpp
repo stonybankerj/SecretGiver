@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 #include <fstream>
+#include <filesystem>
 #include <random>
 #include <chrono>
 #include <functional>
@@ -71,11 +72,19 @@ public:
 		return m_recipient;
 	}
 
-	void Write() const
+	void Write(const filesystem::path& outputDirectory) const
 	{
-		ofstream output(m_name);
-		output << m_recipient;
-		output.close();
+		try
+		{
+			create_directory(outputDirectory);
+			ofstream output(outputDirectory / m_name);
+			output << m_recipient;
+			output.close();
+		}
+		catch(const filesystem::filesystem_error& exception)
+		{
+			cout << "Creating " << outputDirectory << " failed. Error: " << exception.what() << endl;
+		}
 
 	}
 
@@ -130,6 +139,8 @@ void assignAllRecipients(vector<Giver>& givers, const set<string>& recipients, c
 }
 
 int main() {
+	const filesystem::path outputDirectory("givers");
+
 	// Load givers and receivers from the embedded schema2cpp-generated data
 	const InputConfig& config = defaultInputConfig();
 	auto [givers, recipients] = parseConfig(config);
@@ -140,7 +151,7 @@ int main() {
 	// now create a bunch of files, name is giver, contents is recipient
 	for(const auto & nextGiver : givers)
 	{
-		nextGiver.Write();
+		nextGiver.Write(outputDirectory);
 	}
 
 	return 0;
