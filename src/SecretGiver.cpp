@@ -16,18 +16,22 @@
 #include <fstream>
 #include <random>
 #include <chrono>
+#include <functional>
 
 #include "InputConfig.hpp"
 
 using namespace std;
 
-size_t GetRandomNumber(const size_t max)
-{
-	static unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-	static minstd_rand0 generator(seed);
-	std::uniform_int_distribution<size_t> distribution(0, max);
-	return distribution(generator);
 
+std::function<size_t(size_t)> getRandomFunction(
+	unsigned seed = static_cast<unsigned>(chrono::system_clock::now().time_since_epoch().count()))
+{
+	minstd_rand0 generator(seed);
+	return [generator](const size_t max) mutable
+	{
+		std::uniform_int_distribution<size_t> distribution(0, max);
+		return distribution(generator);
+	};
 }
 
 set<string> extendSet(set<string> original, const string& extension)
@@ -50,7 +54,9 @@ public:
 	}
 
 
-	optional<string> AssignRecipient(const set<string>& unassignedRecipients)
+	optional<string> AssignRecipient(
+		const set<string>& unassignedRecipients,
+		const std::function<size_t(size_t)>& randomFunction)
 	{
 		const vector availableRecipients(AvailableRecipients(unassignedRecipients));
 		if(availableRecipients.empty())
@@ -59,7 +65,7 @@ public:
 			return nullopt;
 		}
 
-		const auto randomIndex = GetRandomNumber(availableRecipients.size()-1);
+		const auto randomIndex = randomFunction(availableRecipients.size()-1);
 		m_recipient = availableRecipients[randomIndex];
 
 		return m_recipient;
@@ -85,12 +91,12 @@ public:
 
 };
 
-bool AssignRecipients(vector<Giver>& givers, const set<string>& recipients)
+bool AssignRecipients(vector<Giver>& givers, const set<string>& recipients, const std::function<size_t(size_t)>& randomFunction)
 {
 	set<string> remainingRecipients = recipients;
 	for(auto& nextGiver : givers)
 	{
-		if(auto assignedRecipient = nextGiver.AssignRecipient(remainingRecipients))
+		if(auto assignedRecipient = nextGiver.AssignRecipient(remainingRecipients, randomFunction))
 		{
 			remainingRecipients.erase(*assignedRecipient);
 		}
@@ -115,11 +121,11 @@ pair<vector<Giver>, const set<string>> parseConfig(const InputConfig& config)
 	return {givers, recipients};
 }
 
-void assignAllRecipients(vector<Giver>& givers, const set<string>& recipients) {
+void assignAllRecipients(vector<Giver>& givers, const set<string>& recipients, const std::function<size_t(size_t)>& randomFunction) {
 	bool allAssigned = false;
 	while(!allAssigned)
 	{
-		allAssigned = AssignRecipients(givers, recipients);
+		allAssigned = AssignRecipients(givers, recipients, randomFunction);
 	}
 }
 
@@ -127,8 +133,9 @@ int main() {
 	// Load givers and receivers from the embedded schema2cpp-generated data
 	const InputConfig& config = defaultInputConfig();
 	auto [givers, recipients] = parseConfig(config);
+	const std::function<size_t(size_t)> randomFunction = getRandomFunction();
 
-	assignAllRecipients(givers, recipients);
+	assignAllRecipients(givers, recipients, randomFunction);
 
 	// now create a bunch of files, name is giver, contents is recipient
 	for(const auto & nextGiver : givers)
